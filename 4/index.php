@@ -1,7 +1,7 @@
 <?php
 
 // Подключаем файл с классом UUID
-require_once 'UUID.php';
+require_once '../UUID.php';
 
 // Генерируем UUID версии 4
 $uuid4 = UUID::getV4();
