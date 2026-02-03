@@ -103,7 +103,3 @@ UUID::getV3('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'myname')
    - Для UUIDv3: `3/index.php?namespace=...&name=...`
    - Для UUIDv5: `5/index.php?namespace=...&name=...`
 3. Убедитесь, что параметр `namespace` — это корректный UUID.
-
-## Лицензия
-
-Этот проект является открытым и доступен для использования по лицензии MIT.
