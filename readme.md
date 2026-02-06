@@ -20,6 +20,7 @@ UUID широко используются в распределённых си�
 - `3/index.php` — Принимает параметры `namespace` и `name`, возвращает UUIDv3.
 - `4/index.php` — Возвращает случайно сгенерированный UUIDv4.
 - `5/index.php` — Принимает параметры `namespace` и `name`, возвращает UUIDv5.
+- `index.php` — Главная страница с веб-интерфейсом для генерации UUID разных версий.
 - `readme.md` — Данный файл документации.
 
 ## Класс UUID
@@ -90,6 +91,21 @@ UUID::getV3('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'myname')
   {"error": "Параметры \"namespace\" и \"name\" обязательны для UUIDv5"}
   ```
 
+### `index.php`
+
+- **Метод:** GET
+- **Параметры:** `version` (v3, v4, v5), `count` (для v4, по умолчанию 1), `namespace`, `name` (для v3 и v5)
+- **Описание:** Главная веб-страница с интерфейсом для генерации UUID. Позволяет выбрать версию UUID, указать параметры и количество, и получить результат в виде JSON.
+- **Примеры запросов:**
+  - Генерация одного UUIDv4: `index.php?version=v4`
+  - Генерация 5 UUIDv4: `index.php?version=v4&count=5`
+  - Генерация UUIDv3: `index.php?version=v3&namespace=6ba7b810-9dad-11d1-80b4-00c04fd430c8&name=test`
+  - Генерация UUIDv5: `index.php?version=v5&namespace=6ba7b810-9dad-11d1-80b4-00c04fd430c8&name=test`
+- **Формат ответа:**
+  ```json
+  {"uuids": ["uuid1", "uuid2", ...]}
+  ```
+
 ## Требования
 
 - PHP 7.0 или выше
@@ -102,4 +118,5 @@ UUID::getV3('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'myname')
    - Для UUIDv4: `4/index.php`
    - Для UUIDv3: `3/index.php?namespace=...&name=...`
    - Для UUIDv5: `5/index.php?namespace=...&name=...`
+   - Для веб-интерфейса: `index.php`
 3. Убедитесь, что параметр `namespace` — это корректный UUID.
