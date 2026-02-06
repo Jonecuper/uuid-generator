@@ -4,14 +4,36 @@ require_once 'UUID.php';
 if (isset($_GET['version'])) {
     header('Content-Type: application/json');
     $version = $_GET['version'];
-    $count = isset($_GET['count']) ? (int)$_GET['count'] : 1;
     $uuids = [];
 
-    for ($i = 0; $i < $count; $i++) {
+    // Для UUID v4 можно генерировать несколько идентификаторов
+    if ($_GET['version'] === 'v4') {
+        $count = isset($_GET['count']) ? (int)$_GET['count'] : 1;
+        for ($i = 0; $i < $count; $i++) {
+            switch ($version) {
+                case 'v4':
+                    $uuids[] = UUID::getV4();
+                    break;
+                case 'v3':
+                    $namespace = $_GET['namespace'] ?? '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
+                    $name = $_GET['name'] ?? 'example';
+                    // Для v3 генерируется один и тот же UUID при одинаковых входных данных
+                    $uuids[] = UUID::getV3($namespace, $name);
+                    break;
+                case 'v5':
+                    $namespace = $_GET['namespace'] ?? '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
+                    $name = $_GET['name'] ?? 'example';
+                    // Для v5 генерируется один и тот же UUID при одинаковых входных данных
+                    $uuids[] = UUID::getV5($namespace, $name);
+                    break;
+                default:
+                    echo json_encode(['error' => 'Unsupported version']);
+                    exit;
+            }
+        }
+    } elseif ($_GET['version'] === 'v3' || $_GET['version'] === 'v5') {
+        // Для v3 и v5 генерируем только один UUID, независимо от параметра count
         switch ($version) {
-            case 'v4':
-                $uuids[] = UUID::getV4();
-                break;
             case 'v3':
                 $namespace = $_GET['namespace'] ?? '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
                 $name = $_GET['name'] ?? 'example';
@@ -22,9 +44,6 @@ if (isset($_GET['version'])) {
                 $name = $_GET['name'] ?? 'example';
                 $uuids[] = UUID::getV5($namespace, $name);
                 break;
-            default:
-                echo json_encode(['error' => 'Unsupported version']);
-                exit;
         }
     }
 
@@ -34,6 +53,7 @@ if (isset($_GET['version'])) {
 ?>
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,7 +69,7 @@ if (isset($_GET['version'])) {
             justify-content: center;
             align-items: center;
         }
-        
+
         .container {
             background: white;
             border-radius: 12px;
@@ -58,26 +78,28 @@ if (isset($_GET['version'])) {
             width: 90%;
             max-width: 600px;
         }
-        
+
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 30px;
             font-weight: 600;
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         label {
             display: block;
             margin-bottom: 8px;
             color: #555;
             font-weight: 500;
         }
-        
-        select, input, button {
+
+        select,
+        input,
+        button {
             width: 100%;
             padding: 12px;
             border: 2px solid #e1e1e1;
@@ -86,12 +108,13 @@ if (isset($_GET['version'])) {
             box-sizing: border-box;
             transition: border-color 0.3s ease;
         }
-        
-        select:focus, input:focus {
+
+        select:focus,
+        input:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -101,25 +124,30 @@ if (isset($_GET['version'])) {
             margin-top: 10px;
             transition: transform 0.2s ease;
         }
-        
+
         button:hover {
             transform: translateY(-2px);
         }
-        
+
         button:active {
             transform: translateY(0);
         }
-        
+
         #v3v5-fields {
             display: none;
             animation: fadeIn 0.5s ease;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
-        
+
         textarea {
             width: 100%;
             height: 200px;
@@ -132,12 +160,12 @@ if (isset($_GET['version'])) {
             box-sizing: border-box;
             transition: border-color 0.3s ease;
         }
-        
+
         textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         .copy-btn {
             background: #28a745;
             color: white;
@@ -149,16 +177,17 @@ if (isset($_GET['version'])) {
             margin-top: 10px;
             transition: background 0.3s ease;
         }
-        
+
         .copy-btn:hover {
             background: #218838;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Генератор UUID</h1>
-        
+
         <div class="form-group">
             <label for="version">Версия UUID:</label>
             <select id="version" onchange="toggleFields()">
@@ -167,26 +196,26 @@ if (isset($_GET['version'])) {
                 <option value="v5">UUID v5 (на основе имени и пространства имён, SHA-1)</option>
             </select>
         </div>
-        
+
         <div id="v3v5-fields">
             <div class="form-group">
                 <label for="namespace">Пространство имён:</label>
                 <input type="text" id="namespace" value="6ba7b811-9dad-11d1-80b4-00c04fd430c8">
             </div>
-            
+
             <div class="form-group">
                 <label for="name">Имя:</label>
                 <input type="text" id="name" value="example">
             </div>
         </div>
-        
+
         <div class="form-group">
             <label for="count">Количество UUID:</label>
             <input type="number" id="count" value="1" min="1" max="100">
         </div>
-        
+
         <button onclick="generateUUID()">Сгенерировать UUID</button>
-        
+
         <div class="form-group">
             <label for="result">Результат:</label>
             <textarea id="result" readonly></textarea>
@@ -199,7 +228,7 @@ if (isset($_GET['version'])) {
         function toggleFields() {
             const version = document.getElementById('version').value;
             const fields = document.getElementById('v3v5-fields');
-            
+
             if (version === 'v3' || version === 'v5') {
                 fields.style.display = 'block';
             } else {
@@ -214,30 +243,30 @@ if (isset($_GET['version'])) {
             const namespace = document.getElementById('namespace').value;
             const name = document.getElementById('name').value;
             const resultArea = document.getElementById('result');
-            
+
             // Показываем индикатор загрузки
             resultArea.value = 'Генерация...';
-            
+
             try {
                 // Формируем URL с параметрами
                 let url = `?version=${version}&count=${count}`;
-                
+
                 if (version === 'v3' || version === 'v5') {
                     url += `&namespace=${encodeURIComponent(namespace)}&name=${encodeURIComponent(name)}`;
                 }
-                
+
                 // Выполняем запрос к серверу
                 const response = await fetch(url);
                 const data = await response.json();
-                
+
                 if (data.error) {
                     resultArea.value = `Ошибка: ${data.error}`;
                     return;
                 }
-                
+
                 // Отображаем результат
                 resultArea.value = data.uuids.join('\n');
-                
+
             } catch (error) {
                 resultArea.value = `Ошибка при генерации: ${error.message}`;
             }
@@ -246,20 +275,20 @@ if (isset($_GET['version'])) {
         // Функция копирования в буфер обмена
         function copyToClipboard() {
             const resultArea = document.getElementById('result');
-            
+
             if (resultArea.value.trim() === '' || resultArea.value === 'Генерация...') {
                 alert('Нечего копировать! Сначала сгенерируйте UUID.');
                 return;
             }
-            
+
             resultArea.select();
             document.execCommand('copy');
-            
+
             // Визуальная обратная связь
             const copyBtn = document.querySelector('.copy-btn');
             const originalText = copyBtn.textContent;
             copyBtn.textContent = 'Скопировано!';
-            
+
             setTimeout(() => {
                 copyBtn.textContent = originalText;
             }, 2000);
@@ -271,4 +300,5 @@ if (isset($_GET['version'])) {
         });
     </script>
 </body>
+
 </html>
